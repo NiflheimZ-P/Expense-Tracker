@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import ExpenseCard from "@/components/ExpenseCard";
+import ExpenseCard from "@/components/ExpenseSummary";
 import AddExpenseCard from "@/components/AddExpenseCard"; 
 import ExpenseList from "@/components/ExpenseList";
-import { ExpenseChart } from '@/components/chartExpense';
+import ExpenseChart from '@/components/chartExpense';
 
 
-import { mockExpenses } from '@/data/mockExpenses';
+
 export default function Home() {
   const [expense, setExpense] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -19,6 +19,7 @@ export default function Home() {
       })
       .catch((err) => console.log(err));
   }, []);
+  
   useEffect(()=>{
     fetch("/api/expense")
     .then((res) => res.json())
@@ -44,21 +45,20 @@ export default function Home() {
             Take control of your finances with smart expense tracking and insightful analytics
           </p>
         </div>
-        <div>
-          {categories.map((category) => (
-            <div key={category.id}>
-              <h2 className="text-2xl font-bold text-primary">{category.name}</h2>
-            </div>
-          ))}
-        </div>
+
         {/* Summary Cards */}
-        <ExpenseCard />
+        <ExpenseCard expenses={expense} />
+
 
         {/* Add Expense Form */}
-        <AddExpenseCard />
+        <AddExpenseCard categories={categories} setExpenses={setExpense} setCategories={setCategories} />
+
+
 
         {/* Charts */}
-        <ExpenseChart expenses={mockExpenses} />
+        <ExpenseChart expenses={expense} categories={categories} />
+
+
 
         {/* Expense List */}
         <ExpenseList expenses={expense} categories={categories} />

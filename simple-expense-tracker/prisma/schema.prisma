@@ -28,4 +28,5 @@ model Category{
   name String
   description String?
   expenses Expense[]
+
 }

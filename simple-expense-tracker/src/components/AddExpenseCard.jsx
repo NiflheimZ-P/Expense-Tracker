@@ -1,63 +1,80 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-// import { useToast } from '@/hooks/use-toast';
+"use client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ExpenseCard from "./AddCard/ExpenseCard";
+import CategoryCard from "./AddCard/CategoryCard";
+import { toast } from "sonner";
 
-const expenseSchema = z.object({
-  amount: z.number().min(0.01, 'Amount must be greater than 0'),
-  category: z.enum(['food', 'transport', 'entertainment', 'shopping', 'bills', 'health', 'other']),
-  description: z.string().min(1, 'Description is required'),
-  date: z.string().min(1, 'Date is required'),
-});
+const ExpenseFormCard = ({ categories, setExpenses, setCategories }) => {
 
-const categoryLabels = {
-  food: '🍕 Food & Dining',
-  transport: '🚗 Transportation',
-  entertainment: '🎬 Entertainment',
-  shopping: '🛍️ Shopping',
-  bills: '📄 Bills & Utilities',
-  health: '🏥 Health & Medical',
-  other: '📝 Other',
-};
-
-const AddExpenseCard = ({ onAddExpense }) => {
   const [isOpen, setIsOpen] = useState(false);
-  // const { toast } = useToast();
-  
-  const form = useForm({
-    resolver: zodResolver(expenseSchema),
+  const expenseForm = useForm({
     defaultValues: {
-      amount: 0,
-      category: 'food',
-      description: '',
-      date: new Date().toISOString().split('T')[0],
+      title: "",
+      amount: "",
+      category: categories[0]?.id.toString() || "",
+      date: new Date().toISOString().split("T")[0],
     },
   });
+  const categoryForm = useForm({ defaultValues: { name: "" } });
 
-  const onSubmit = (data) => {
-    onAddExpense(data);
-    form.reset();
-    setIsOpen(false);
-    // toast({
-    //   title: "Expense Added",
-    //   description: `${data.description} - $${data.amount}`,
-    // });
-  };
+const handleExpenseSubmit = async (data) => {
+  try {
+    const res = await fetch("/api/expense", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...data, categoryId: Number(data.category) }),
+    });
+    const result = await res.json();
+    if (res.ok) {
+      toast.success(result.message, { duration: 3000 });
+      expenseForm.reset();
+      setIsOpen(false);
+      setExpenses((prev) => [...prev, result.expense]);
+    } else {
+      toast.error(result.error , { duration: 3000 });
+    }
+  } catch (error) {
+    toast.error(error.message , { duration: 3000 });
+  }
+};
+
+const handleCategorySubmit = async (data) => {
+  try {
+    const res = await fetch("/api/category", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+    if (res.ok) {
+      toast.success(result.message, { duration: 3000 });
+      categoryForm.reset();
+      setIsOpen(false);
+      setCategories((prev) => [...prev, result.category]);
+
+    } else {
+      toast.error(result.error, { duration: 3000 });
+    }
+  } catch (error) {
+    toast.error(error.message, { duration: 3000 });
+  }
+};
 
   if (!isOpen) {
     return (
-      <Card className="cursor-pointer transition-all hover:shadow-md" onClick={() => setIsOpen(true)}>
+      <Card
+        className="cursor-pointer transition-all hover:shadow-md"
+        onClick={() => setIsOpen(true)}
+      >
         <CardContent className="flex items-center justify-center p-6">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Plus className="h-5 w-5" />
-            <span>Add New Expense</span>
+            <span>Add New Expense Or Add New Category</span>
           </div>
         </CardContent>
       </Card>
@@ -66,105 +83,43 @@ const AddExpenseCard = ({ onAddExpense }) => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Plus className="h-5 w-5" />
-          Add New Expense
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+      <Tabs defaultValue="expense">
+        <TabsList className="w-full mb-2">
+          <TabsTrigger value="expense">Add New Expense</TabsTrigger>
+          <TabsTrigger value="category">Add New Category</TabsTrigger>
+        </TabsList>
+        <TabsContent value="expense">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 mb-3">
+              <Plus className="h-5 w-5" /> Add New Expense
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ExpenseCard
+              categories={categories}
+              form={expenseForm}
+              onSubmit={handleExpenseSubmit}
+              onCancel={() => setIsOpen(false)}
             />
-            
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.entries(categoryLabels).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </CardContent>
+        </TabsContent>
+        <TabsContent value="category">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 mb-3">
+              <Plus className="h-5 w-5" /> Add New Category
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CategoryCard
+              form={categoryForm}
+              onSubmit={handleCategorySubmit}
+              onCancel={() => setIsOpen(false)}
             />
-            
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input placeholder="What did you spend on?" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex gap-2">
-              <Button type="submit" className="flex-1">
-                Add Expense
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsOpen(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
+          </CardContent>
+        </TabsContent>
+      </Tabs>
     </Card>
   );
 };
 
-export default AddExpenseCard;
+export default ExpenseFormCard;

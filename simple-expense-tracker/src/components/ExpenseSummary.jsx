@@ -1,8 +1,24 @@
-'use client'
-import { DollarSign, TrendingUp, Calendar, CreditCard } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+"use client";
+import { DollarSign, TrendingUp, Calendar, CreditCard } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const ExpenseCard = () => {
+const ExpenseCard = ({ expenses }) => {
+  const totalExpenses = expenses.reduce(
+    (acc, expense) => acc + Number(expense.amount),
+    0
+  );
+  const totalTransactions = expenses.length;
+  const averageExpense = totalExpenses / totalTransactions;
+  const thisMonth = new Date().getMonth() + 1;
+  const thisMonthExpenses = expenses.filter((expense) => {
+    const expenseDate = new Date(expense.date);
+    return expenseDate.getMonth() + 1 === thisMonth;
+  });
+  const thisMonthTotalExpenses = thisMonthExpenses.reduce(
+    (acc, expense) => acc + Number(expense.amount),
+    0
+  );
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
@@ -11,7 +27,8 @@ const ExpenseCard = () => {
           <DollarSign className="h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">200</div>
+          <div className="text-2xl font-bold">{totalExpenses.toFixed(2)}</div>
+
           <p className="text-xs opacity-80">All time total</p>
         </CardContent>
       </Card>
@@ -23,10 +40,10 @@ const ExpenseCard = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            2
+            {thisMonthTotalExpenses.toFixed(2)}
           </div>
           <p className="text-xs text-muted-foreground">
-            10 transactions
+            {thisMonthExpenses.length} transactions
           </p>
         </CardContent>
       </Card>
@@ -37,7 +54,7 @@ const ExpenseCard = () => {
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">50</div>
+          <div className="text-2xl font-bold">{averageExpense.toFixed(2)}</div>
           <p className="text-xs text-muted-foreground">Per transaction</p>
         </CardContent>
       </Card>
@@ -50,11 +67,11 @@ const ExpenseCard = () => {
           <CreditCard className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">300</div>
+          <div className="text-2xl font-bold">{totalTransactions}</div>
           <p className="text-xs text-muted-foreground">All time count</p>
         </CardContent>
       </Card>
     </div>
   );
-}
+};
 export default ExpenseCard;

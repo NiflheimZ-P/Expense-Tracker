@@ -32,7 +32,7 @@ async function main() {
     title: `Expense ${i + 1}`,
     amount: parseFloat((Math.random() * 100).toFixed(2)), // random amount 0-100
     date: new Date(
-      Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000
+      Date.now() - Math.floor(Math.random() * 300) * 24 * 60 * 60 * 1000
     ), // random date in last 30 days
     categoryId: getRandomCategoryId(),
   }));

@@ -14,43 +14,37 @@ import {
   CartesianGrid,
 } from "recharts";
 
-const categoryLabels = {
-  food: 'Food',
-  transport: 'Transport', 
-  entertainment: 'Entertainment',
-  shopping: 'Shopping',
-  bills: 'Bills',
-  health: 'Health',
-  other: 'Other',
+const getRandomColor = (minHue = 90, maxHue = 210) => {
+  const hue = Math.floor(Math.random() * (maxHue - minHue)) + minHue;
+  const saturation = Math.floor(Math.random() * 40) + 40;
+  const lightness = Math.floor(Math.random() * 20) + 50;
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 };
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
+const ExpenseChart = ({ expenses, categories }) => {
+    const categoryData = Object.entries(categories).map(([_, category]) => {
+    const categoryExpenses = expenses.filter(expense => Number(expense.categoryId ) === Number(category.id));
+    const total = Number(categoryExpenses.reduce((sum, expense) => sum + Number(expense.amount), 0));
 
-export function ExpenseChart({ expenses }) {
-  // Group expenses by category
-  const categoryData = Object.entries(categoryLabels).map(([category, label]) => {
-    const categoryExpenses = expenses.filter(expense => expense.category === category);
-    const total = categoryExpenses.reduce((sum, expense) => sum + expense.amount, 0);
     return {
-      name: label,
-      amount: total,
-      count: categoryExpenses.length,
+      name: category.name,
+      amount: Number(total),
+      count: Number(categoryExpenses.length),
     };
   }).filter(item => item.amount > 0);
-
-  // Group expenses by month
+ 
   const monthlyData = expenses.reduce((acc, expense) => {
-    const month = expense.date.slice(0, 7); // YYYY-MM format
+    const month = expense.date.slice(0, 7);
     if (!acc[month]) {
       acc[month] = 0;
     }
-    acc[month] += expense.amount;
+    acc[month] += Number(expense.amount);
     return acc;
   }, {});
 
   const monthlyChartData = Object.entries(monthlyData)
     .sort(([a], [b]) => a.localeCompare(b))
-    .slice(-6) // Last 6 months
+    .slice(-6)
     .map(([month, amount]) => ({
       month: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       amount,
@@ -78,10 +72,10 @@ export function ExpenseChart({ expenses }) {
                   fill="#8884d8"
                   dataKey="amount"
                 >
-                  {categoryData.map((entry, index) => (
+                  {categoryData.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+                      fill={getRandomColor()}
                     />
                   ))}
                 </Pie>
@@ -116,7 +110,7 @@ export function ExpenseChart({ expenses }) {
                 />
                 <Bar
                   dataKey="amount"
-                  fill="hsl(var(--primary))"
+                  fill="#289e8c"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
@@ -129,5 +123,3 @@ export function ExpenseChart({ expenses }) {
 };
 
 export default ExpenseChart;
-
-
