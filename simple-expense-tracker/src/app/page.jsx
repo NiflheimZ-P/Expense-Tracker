@@ -61,7 +61,7 @@ export default function Home() {
         <ExpenseChart expenses={mockExpenses} />
 
         {/* Expense List */}
-        <ExpenseList expenses={expense} />
+        <ExpenseList expenses={expense} categories={categories} />
       </div>
     </div>
   );

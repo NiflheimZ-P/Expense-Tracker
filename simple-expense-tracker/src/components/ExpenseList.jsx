@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Search, Filter, ArrowUpDown } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { toLowerCase } from 'zod';
+
 
 const categoryLabels = {
   food: '🍕 Food',
@@ -27,21 +29,20 @@ const categoryColors = {
   other: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
 };
 
-const ExpenseList = ({ expenses }) => {
+const ExpenseList = ({ expenses, categories }) => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     sortBy: 'date',
     sortOrder: 'desc',
   });
-  console.log(expenses)
-
 
   // Filter and sort expenses
   const filteredExpenses = expenses
     .filter(expense => {
-      const categoryName = expense.category?.name || "";
-      const matchesSearch = categoryName.toLowerCase().includes(searchTerm.toLowerCase());
+      const categoryName = expense.category?.name.toLowerCase() || "";
+      const matchesSearch = categoryName.includes(searchTerm.toLowerCase()) || 
+      expense.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = !filters.category || categoryName === filters.category;
       
       let matchesDateRange = true;
@@ -106,9 +107,9 @@ const ExpenseList = ({ expenses }) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {Object.entries(categoryLabels).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
+                {categories.map((value) => (
+                  <SelectItem key={value.name.toLowerCase()} value={value.name.toLowerCase()}>
+                    {value.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -168,9 +169,10 @@ const ExpenseList = ({ expenses }) => {
                   <div className="flex items-center gap-3">
                     <Badge 
                       variant="secondary" 
-                      className={categoryColors[expense.category]}
+                      className={categoryColors[expense.category.name.toLowerCase()]}
                     >
-                      {categoryLabels[expense.category]}
+                      {expense.category.name}
+                      {/* {categoryLabels[expense.category.name.toLowerCase()]} */}
                     </Badge>
                     <div>
                       <p className="font-medium">{expense.title}</p>
