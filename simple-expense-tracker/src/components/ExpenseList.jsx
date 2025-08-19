@@ -13,27 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, ArrowUpDown } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
-const categoryLabels = {
-  food: "🍕 Food",
-  transport: "🚗 Transport",
-  entertainment: "🎬 Entertainment",
-  shopping: "🛍️ Shopping",
-  bills: "📄 Bills",
-  health: "🏥 Health",
-  other: "📝 Other",
-};
-
-const categoryColors = {
-  food: "bg-orange-100 text-black dark:bg-orange-900/20 dark:text-orange-300",
-  transport: "bg-blue-100 text-black dark:bg-blue-900/20 dark:text-blue-300",
-  entertainment:
-    "bg-purple-100 text-black dark:bg-purple-900/20 dark:text-purple-300",
-  shopping: "bg-pink-100 text-black dark:bg-pink-900/20 dark:text-pink-300",
-  bills: "bg-red-100 text-black dark:bg-red-900/20 dark:text-red-300",
-  health: "bg-green-100 text-black dark:bg-green-900/20 dark:text-green-300",
-  other: "bg-gray-100 text-black dark:bg-gray-900/20 dark:text-gray-300",
-};
-
 const ExpenseList = ({ expenses, categories }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
@@ -49,7 +28,6 @@ const ExpenseList = ({ expenses, categories }) => {
         expense.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory =
         !filters.category || categoryName === filters.category;
-
       let matchesDateRange = true;
       if (filters.dateRange) {
         const expenseDate = new Date(expense.date);
@@ -57,12 +35,10 @@ const ExpenseList = ({ expenses, categories }) => {
         const endDate = new Date(filters.dateRange.end);
         matchesDateRange = expenseDate >= startDate && expenseDate <= endDate;
       }
-
       return matchesSearch && matchesCategory && matchesDateRange;
     })
     .sort((a, b) => {
       let comparison = 0;
-
       switch (filters.sortBy) {
         case "date":
           comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -72,10 +48,8 @@ const ExpenseList = ({ expenses, categories }) => {
           break;
         case "category":
           comparison = a.category?.name.localeCompare(b.category?.name);
-
           break;
       }
-
       return filters.sortOrder === "desc" ? -comparison : comparison;
     });
 
@@ -180,10 +154,7 @@ const ExpenseList = ({ expenses, categories }) => {
                   <div className="flex items-center gap-3">
                     <Badge
                       variant="secondary"
-                      className={
-                        categoryColors[expense.category?.name?.toLowerCase()] ||
-                        "bg-gray-100 text-black"
-                      }
+                      className={"bg-green-200 text-gray-700"}
                     >
                       {expense.category?.name || "No Category"}
                     </Badge>

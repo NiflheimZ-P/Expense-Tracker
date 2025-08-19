@@ -42,7 +42,7 @@ export default function Home() {
             </h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Take control of your finances with smart expense tracking and insightful analytics
+            Dashboard to tracks your expenses
           </p>
         </div>
 

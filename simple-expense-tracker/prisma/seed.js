@@ -2,7 +2,7 @@ import { PrismaClient } from '../src/generated/prisma/client.js';
 
 const prisma = new PrismaClient();
 async function main() {
-  // Truncate (delete all existing data)
+
   await prisma.expense.deleteMany();
   await prisma.category.deleteMany();
   // Seed categories
@@ -22,7 +22,6 @@ async function main() {
   });
   // Fetch created categories to use their IDs
   const allCategories = await prisma.category.findMany();
-  // Helper to get random category id
   const getRandomCategoryId = () => {
     const randomIndex = Math.floor(Math.random() * allCategories.length);
     return allCategories[randomIndex].id;
@@ -32,8 +31,8 @@ async function main() {
     title: `Expense ${i + 1}`,
     amount: parseFloat((Math.random() * 100).toFixed(2)), // random amount 0-100
     date: new Date(
-      Date.now() - Math.floor(Math.random() * 300) * 24 * 60 * 60 * 1000
-    ), // random date in last 30 days
+      Date.now() - Math.floor(Math.random() * 365) * 24 * 60 * 60 * 1000
+    ), 
     categoryId: getRandomCategoryId(),
   }));
   await prisma.expense.createMany({
