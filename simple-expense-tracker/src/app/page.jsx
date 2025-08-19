@@ -1,8 +1,32 @@
-import Image from "next/image";
+"use client"
+
+import { useState, useEffect } from 'react';
 import ExpenseCard from "@/components/ExpenseCard";
 import AddExpenseCard from "@/components/AddExpenseCard"; 
+import ExpenseList from "@/components/ExpenseList";
+import { ExpenseChart } from '@/components/chartExpense';
 
+
+import { mockExpenses } from '@/data/mockExpenses';
 export default function Home() {
+  const [expense, setExpense] = useState([]);
+  const [categories, setCategories] = useState([]);
+  useEffect(() => {
+    fetch("/api/category")
+      .then((res) => res.json())
+      .then((data) => {
+        setCategories(data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+  useEffect(()=>{
+    fetch("/api/expense")
+    .then((res) => res.json())
+    .then((data) => {
+      setExpense(data);
+    })
+    .catch((err) => console.log(err));
+  },[]);
   return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
       <div className="container mx-auto p-6 space-y-6">
@@ -20,7 +44,13 @@ export default function Home() {
             Take control of your finances with smart expense tracking and insightful analytics
           </p>
         </div>
-
+        <div>
+          {categories.map((category) => (
+            <div key={category.id}>
+              <h2 className="text-2xl font-bold text-primary">{category.name}</h2>
+            </div>
+          ))}
+        </div>
         {/* Summary Cards */}
         <ExpenseCard />
 
@@ -28,10 +58,10 @@ export default function Home() {
         <AddExpenseCard />
 
         {/* Charts */}
-        {/* <ExpenseChart expenses={expenses} /> */}
+        <ExpenseChart expenses={mockExpenses} />
 
         {/* Expense List */}
-        {/* <ExpenseList expenses={expenses} /> */}
+        <ExpenseList expenses={expense} />
       </div>
     </div>
   );
