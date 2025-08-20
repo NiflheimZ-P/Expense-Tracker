@@ -82,9 +82,9 @@ const handleCategorySubmit = async (data) => {
   }
 
   return (
-    <Card>
-      <Tabs defaultValue="expense">
-        <TabsList className="w-full mb-2">
+    <Card className="w-full pt-0"> 
+      <Tabs defaultValue="expense" className="w-full p-1">
+        <TabsList className="w-full mb-2 bg-gray-100 h-12">
           <TabsTrigger value="expense">Add New Expense</TabsTrigger>
           <TabsTrigger value="category">Add New Category</TabsTrigger>
         </TabsList>

@@ -151,7 +151,7 @@ const ExpenseList = ({ expenses, categories }) => {
                   key={expense.id}
                   className="flex items-center justify-between p-4 rounded-lg border bg-card hover:shadow-sm transition-shadow"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="grid grid-cols-2 items-center gap-3 ">
                     <Badge
                       variant="secondary"
                       className={"bg-green-200 text-gray-700"}
